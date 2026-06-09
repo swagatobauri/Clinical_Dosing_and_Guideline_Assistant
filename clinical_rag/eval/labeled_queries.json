@@ -1,2 +1,142 @@
 [
+  {
+    "id": "q01",
+    "query": "What is the maximum metformin dose for a patient with eGFR 30-45 mL/min/1.73 m2?",
+    "ground_truth_answer": "500mg twice daily; do not exceed 1000mg/day in stage 3b CKD (eGFR 30-44).",
+    "relevant_section": "Metformin / Renal Dosing Adjustments",
+    "query_type": "dose_with_condition"
+  },
+  {
+    "id": "q02",
+    "query": "What is the recommended apixaban dose for AFib in a patient who is 82 years old, weighs 58 kg, and has a serum creatinine of 1.2 mg/dL?",
+    "ground_truth_answer": "2.5 mg twice daily, as the patient meets at least two criteria (age >= 80, weight <= 60 kg).",
+    "relevant_section": "Apixaban / Atrial Fibrillation Dosing",
+    "query_type": "dose_with_condition"
+  },
+  {
+    "id": "q03",
+    "query": "What is the initial empiric vancomycin dose for a pediatric patient (age 6) with normal renal function suspected of MRSA bacteremia?",
+    "ground_truth_answer": "15 to 20 mg/kg/dose every 6 to 8 hours.",
+    "relevant_section": "Vancomycin / Pediatric Dosing Guidelines",
+    "query_type": "dose_with_condition"
+  },
+  {
+    "id": "q04",
+    "query": "What is the recommended amoxicillin dose for acute otitis media in a child weighing 15 kg?",
+    "ground_truth_answer": "80 to 90 mg/kg/day divided every 12 hours (approx. 600-675 mg per dose twice daily).",
+    "relevant_section": "Amoxicillin / Acute Otitis Media Pediatric Dosing",
+    "query_type": "dose_with_condition"
+  },
+  {
+    "id": "q05",
+    "query": "What is the starting dose of rosuvastatin for a patient of Asian descent?",
+    "ground_truth_answer": "5 mg once daily due to increased systemic exposure in Asian patients.",
+    "relevant_section": "Rosuvastatin / Special Populations",
+    "query_type": "dose_with_condition"
+  },
+  {
+    "id": "q06",
+    "query": "How should gabapentin be dosed for a patient with an eGFR < 15 mL/min/1.73 m2 not on dialysis?",
+    "ground_truth_answer": "100 to 300 mg once daily, reduced from the standard dose.",
+    "relevant_section": "Gabapentin / Renal Impairment Adjustments",
+    "query_type": "dose_with_condition"
+  },
+  {
+    "id": "q07",
+    "query": "How much should a levothyroxine dose typically be increased for a patient who is newly pregnant?",
+    "ground_truth_answer": "Increase the pre-pregnancy dose by 20-30%, or administer two additional doses per week.",
+    "relevant_section": "Levothyroxine / Pregnancy Dosing Guidelines",
+    "query_type": "dose_with_condition"
+  },
+  {
+    "id": "q08",
+    "query": "What is the fluconazole maintenance dose for oropharyngeal candidiasis in a patient with a creatinine clearance of 30 mL/min?",
+    "ground_truth_answer": "50% of the normal dose (e.g., 50 to 100 mg daily) after a normal loading dose.",
+    "relevant_section": "Fluconazole / Renal Dosing",
+    "query_type": "dose_with_condition"
+  },
+  {
+    "id": "q09",
+    "query": "Can ketorolac be given for pain management following coronary artery bypass graft (CABG) surgery?",
+    "ground_truth_answer": "No, ketorolac is contraindicated in the setting of CABG surgery.",
+    "relevant_section": "Ketorolac / Contraindications",
+    "query_type": "contraindication"
+  },
+  {
+    "id": "q10",
+    "query": "Is sildenafil safe to use for a patient taking a scheduled daily isosorbide mononitrate?",
+    "ground_truth_answer": "No, concurrent use of sildenafil and any form of organic nitrates is strictly contraindicated due to the risk of severe hypotension.",
+    "relevant_section": "Sildenafil / Contraindications",
+    "query_type": "contraindication"
+  },
+  {
+    "id": "q11",
+    "query": "Is it safe to administer ceftriaxone to a hyperbilirubinemic neonate?",
+    "ground_truth_answer": "No, ceftriaxone is contraindicated in hyperbilirubinemic neonates, especially premature ones, due to risk of bilirubin encephalopathy.",
+    "relevant_section": "Ceftriaxone / Pediatric Contraindications",
+    "query_type": "contraindication"
+  },
+  {
+    "id": "q12",
+    "query": "Is bupropion an appropriate antidepressant for a patient with a current or prior diagnosis of anorexia nervosa?",
+    "ground_truth_answer": "No, bupropion is contraindicated in patients with a history of anorexia nervosa or bulimia due to an increased risk of seizures.",
+    "relevant_section": "Bupropion / Contraindications",
+    "query_type": "contraindication"
+  },
+  {
+    "id": "q13",
+    "query": "What is the maximum daily dose of citalopram for a 75-year-old patient?",
+    "ground_truth_answer": "20 mg per day due to the risk of QT prolongation.",
+    "relevant_section": "Citalopram / Geriatric Dosing and Maximums",
+    "query_type": "max_dose"
+  },
+  {
+    "id": "q14",
+    "query": "What is the absolute maximum daily dose of acetaminophen for a healthy adult?",
+    "ground_truth_answer": "4,000 mg (4 grams) per day to avoid hepatotoxicity.",
+    "relevant_section": "Acetaminophen / Maximum Daily Limits",
+    "query_type": "max_dose"
+  },
+  {
+    "id": "q15",
+    "query": "What is the maximum recommended daily dose of lisinopril for the treatment of hypertension?",
+    "ground_truth_answer": "80 mg once daily.",
+    "relevant_section": "Lisinopril / Hypertension Dosing Limits",
+    "query_type": "max_dose"
+  },
+  {
+    "id": "q16",
+    "query": "What is the maximum daily dose of simvastatin for a patient who is concurrently taking amlodipine?",
+    "ground_truth_answer": "20 mg per day to reduce the risk of myopathy.",
+    "relevant_section": "Simvastatin / Drug Interactions and Maximum Dosing",
+    "query_type": "max_dose"
+  },
+  {
+    "id": "q17",
+    "query": "What is the expected interaction between warfarin and amiodarone, and how should it be managed?",
+    "ground_truth_answer": "Amiodarone inhibits warfarin metabolism, increasing INR and bleeding risk. The warfarin dose should generally be reduced by 30-50% upon amiodarone initiation.",
+    "relevant_section": "Warfarin / Drug Interactions",
+    "query_type": "drug_interaction"
+  },
+  {
+    "id": "q18",
+    "query": "How does omeprazole affect the efficacy of clopidogrel?",
+    "ground_truth_answer": "Omeprazole inhibits CYP2C19, which is needed to convert clopidogrel to its active metabolite, thereby significantly reducing clopidogrel's antiplatelet effect.",
+    "relevant_section": "Clopidogrel / CYP2C19 Interactions",
+    "query_type": "drug_interaction"
+  },
+  {
+    "id": "q19",
+    "query": "What is the target therapeutic serum concentration range for digoxin when treating heart failure?",
+    "ground_truth_answer": "0.5 to 0.9 ng/mL.",
+    "relevant_section": "Digoxin / Therapeutic Drug Monitoring",
+    "query_type": "monitoring"
+  },
+  {
+    "id": "q20",
+    "query": "How frequently should serum lithium levels be monitored during the maintenance phase of bipolar disorder treatment?",
+    "ground_truth_answer": "Every 3 to 6 months, or whenever there is a dose change, signs of toxicity, or starting a medication that interacts with lithium.",
+    "relevant_section": "Lithium / Monitoring Parameters",
+    "query_type": "monitoring"
+  }
 ]
