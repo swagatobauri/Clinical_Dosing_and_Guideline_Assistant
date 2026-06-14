@@ -1,18 +1,36 @@
+# Core LangChain stack
 langchain
 langchain-community
-langchain-experimental
+langchain-core
 langchain-groq
+langchain-openai
+langchain-huggingface
+langchain-experimental
+langchain-text-splitters
+
+# LLM & Embeddings
 groq
+sentence-transformers
+torch
+
+# Vector Search
 faiss-cpu
 rank_bm25
+
+# PDF Parsing
+pypdf
+
+# Evaluation
 ragas
+
+# Optional Rerankers
 cohere
-openai
-fastapi
+
+# App & UI
 streamlit
 python-dotenv
+
+# Utilities
+numpy
 pandas
-pymupdf
-sentence-transformers
 tabulate
-pytest
