@@ -1,10 +1,10 @@
-from typing import TypedDict, List, Dict, Any
 # pyrefly: ignore [missing-import]
-from langchain_community.embeddings import OpenAIEmbeddings
+import numpy as np
 # pyrefly: ignore [missing-import]
-from langchain_community.vectorstores import FAISS
+import faiss
+from typing import List, Dict, Any, TypedDict
 # pyrefly: ignore [missing-import]
-from langchain_core.documents import Document
+from langchain_huggingface import HuggingFaceEmbeddings
 
 class ScoredChunk(TypedDict):
     chunk_id: str
@@ -13,40 +13,45 @@ class ScoredChunk(TypedDict):
     metadata: Dict[str, Any]
 
 class DenseRetriever:
-    def __init__(self, embedding_model: str = "text-embedding-3-small"):
-        self.embeddings = OpenAIEmbeddings(model=embedding_model)
-        self.vectorstore = None
-        self.chunk_map = {}
+    def __init__(self, embedding_model="all-MiniLM-L6-v2"):
+        # Uses local HuggingFace embeddings (100% Free, runs offline)
+        self.embeddings = HuggingFaceEmbeddings(model_name=embedding_model)
+        self.faiss_index = None
+        self.chunks = []
 
     def index(self, chunks: List[Dict[str, Any]]):
-        docs = []
-        for c in chunks:
-            chunk_id = c.get("chunk_id", "")
-            self.chunk_map[chunk_id] = c
+        if not chunks:
+            return
             
-            metadata = c.get("metadata", {}).copy()
-            metadata["chunk_id"] = chunk_id
-            
-            docs.append(Document(page_content=c.get("text", ""), metadata=metadata))
+        self.chunks.extend(chunks)
+        texts = [c.get("text", "") for c in chunks]
         
-        if docs:
-            self.vectorstore = FAISS.from_documents(docs, self.embeddings)
+        # Generate embeddings
+        embs = self.embeddings.embed_documents(texts)
+        embs_array = np.array(embs).astype("float32")
+        
+        # Dynamically initialize FAISS index based on embedding dimension
+        if self.faiss_index is None:
+            dim = embs_array.shape[1]
+            self.faiss_index = faiss.IndexFlatL2(dim)
+            
+        self.faiss_index.add(embs_array)
 
     def search(self, query: str, k: int = 10) -> List[ScoredChunk]:
-        if not self.vectorstore:
+        if self.faiss_index is None or self.faiss_index.ntotal == 0:
             return []
             
-        results = self.vectorstore.similarity_search_with_score(query, k=k)
+        query_emb = self.embeddings.embed_query(query)
+        query_emb_array = np.array([query_emb]).astype("float32")
         
-        scored_chunks = []
-        for doc, score in results:
-            chunk_id = doc.metadata.get("chunk_id", "")
-            
-            scored_chunks.append({
-                "chunk_id": chunk_id,
-                "text": doc.page_content,
-                "score": float(score),
-                "metadata": doc.metadata
-            })
-            
-        return scored_chunks
+        distances, indices = self.faiss_index.search(query_emb_array, k)
+        
+        results = []
+        for i, idx in enumerate(indices[0]):
+            if idx != -1 and idx < len(self.chunks):
+                chunk = self.chunks[idx].copy()
+                # FAISS L2 distance: lower is better. We invert it so higher is better for RRF.
+                chunk["score"] = 1.0 / (1.0 + float(distances[0][i]))
+                results.append(chunk)
+                
+        return results

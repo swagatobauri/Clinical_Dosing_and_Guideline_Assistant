@@ -4,18 +4,27 @@ import argparse
 import pandas as pd
 from typing import List, Dict, Any
 from tabulate import tabulate
+# pyrefly: ignore [missing-import]
 from dotenv import load_dotenv
 
 # Langchain
+# pyrefly: ignore [missing-import]
 from langchain_community.vectorstores import FAISS
+# pyrefly: ignore [missing-import]
 from langchain_community.embeddings import OpenAIEmbeddings
+# pyrefly: ignore [missing-import]
 from langchain_groq import ChatGroq
+# pyrefly: ignore [missing-import]
 from langchain_core.prompts import PromptTemplate
+# pyrefly: ignore [missing-import]
 from langchain_core.documents import Document
 
 # Ragas
+# pyrefly: ignore [missing-import]
 from datasets import Dataset
+# pyrefly: ignore [missing-import]
 from ragas import evaluate
+# pyrefly: ignore [missing-import]
 from ragas.metrics import (
     context_precision,
     context_recall,

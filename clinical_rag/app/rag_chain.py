@@ -23,17 +23,9 @@ class ClinicalRAGChain:
     def __init__(self, strategy="hierarchical"):
         self.strategy = strategy
         
-        # Patch for FakeEmbeddings if OpenAI key is missing (for testing)
-        if not os.getenv("OPENAI_API_KEY"):
-            print("Warning: OPENAI_API_KEY not found. Using FakeEmbeddings.")
-            # pyrefly: ignore [missing-import]
-            from langchain_community.embeddings import FakeEmbeddings
-            import retrieval.dense
-            retrieval.dense.OpenAIEmbeddings = lambda model=None: FakeEmbeddings(size=1536)
-
         # Build the retrievers
+        # Uses local HuggingFace embeddings by default (100% Free)
         self.dense_retriever = DenseRetriever(embedding_model=settings.embedding_model)
-        
         self.bm25_retriever = BM25Retriever()
         self.reranker = get_reranker()
         

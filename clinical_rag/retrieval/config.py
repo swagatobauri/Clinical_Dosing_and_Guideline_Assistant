@@ -9,7 +9,7 @@ load_dotenv()
 class Settings:
     reranker: str = os.getenv("RERANKER", "crossencoder")
     llm_model: str = os.getenv("LLM_MODEL", "llama-3.3-70b-versatile")
-    embedding_model: str = os.getenv("EMBEDDING_MODEL", "text-embedding-3-small")
+    embedding_model: str = os.getenv("EMBEDDING_MODEL", "all-MiniLM-L6-v2")
     top_k: int = int(os.getenv("TOP_K", "5"))
     rrf_k: int = int(os.getenv("RRF_K", "60"))
 
