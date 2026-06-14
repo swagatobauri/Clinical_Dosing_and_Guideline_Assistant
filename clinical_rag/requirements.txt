@@ -34,3 +34,4 @@ python-dotenv
 numpy
 pandas
 tabulate
+torchvision
