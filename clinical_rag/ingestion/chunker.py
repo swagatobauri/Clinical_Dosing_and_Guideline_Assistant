@@ -1,7 +1,15 @@
 import os
 import uuid
 import re
+import nltk
 from typing import List, Dict, Any
+
+# Ensure NLTK punkt data is available for sentence tokenization
+try:
+    nltk.data.find('tokenizers/punkt_tab')
+except LookupError:
+    # Use quiet=True to avoid printing download messages in stdout
+    nltk.download('punkt_tab', quiet=True)
 
 # pyrefly: ignore [missing-import]
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -131,8 +139,8 @@ def hierarchical_chunker(sections: List[Dict[str, Any]]) -> List[Dict[str, Any]]
         })
         
         # Create child chunks
-        # Basic sentence splitting keeping terminators
-        sentences = re.split(r'(?<=[.!?])\s+', text)
+        # Use NLTK sentence tokenizer for clinical-aware splitting
+        sentences = nltk.sent_tokenize(text)
         for sentence in sentences:
             sentence = sentence.strip()
             if not sentence:
@@ -157,7 +165,8 @@ if __name__ == "__main__":
         "Monitor for signs of bleeding. "
         "\n\n"
         "If patient is allergic to aspirin, consider clopidogrel as an alternative. "
-        "Dosing guidelines require adjustment for renal impairment."
+        "Dr. Smith recommends adjusting the dose for renal impairment, e.g. for eGFR < 30 mL/min/1.73 m2. "
+        "Give 500mg b.i.d. for best results."
     )
     
     sample_sections = [

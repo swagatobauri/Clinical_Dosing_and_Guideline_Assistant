@@ -1,0 +1,22 @@
+HOSPITAL CLINICAL DOSING GUIDELINES (2026)
+
+1. ACETAMINOPHEN (PARACETAMOL)
+Section: Adult Dosing
+The maximum recommended daily dose of acetaminophen for a healthy adult is 4,000 mg per day. Exceeding this limit can cause severe hepatotoxicity (liver damage). For patients with a history of alcoholism or active liver disease, the maximum daily dose should not exceed 2,000 mg per day.
+
+Section: Pediatric Dosing
+For children, the dose is 10 to 15 mg/kg per dose every 4 to 6 hours as needed. Do not exceed 5 doses (75 mg/kg) in a 24-hour period.
+
+2. IBUPROFEN
+Section: General Dosing
+The maximum over-the-counter dose for ibuprofen is 1,200 mg per day. Under medical supervision, the maximum prescription dose is 3,200 mg per day.
+
+Section: Renal Warnings
+Ibuprofen should be completely avoided in patients with an eGFR less than 30 mL/min/1.73m2 due to the risk of acute kidney injury.
+
+3. AMOXICILLIN
+Section: Otitis Media (Ear Infection)
+For pediatric patients with acute otitis media, the standard high-dose regimen is 90 mg/kg/day divided every 12 hours. The maximum daily dose should not exceed 3,000 mg.
+
+Section: Adult Pneumonia
+For community-acquired pneumonia in adults, the dose is 1,000 mg three times daily (TID) for 5 to 7 days.

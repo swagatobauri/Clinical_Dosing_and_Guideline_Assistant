@@ -35,3 +35,4 @@ numpy
 pandas
 tabulate
 torchvision
+nltk
