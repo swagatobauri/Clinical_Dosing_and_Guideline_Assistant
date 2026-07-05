@@ -11,6 +11,7 @@ from retrieval.config import settings
 from retrieval.dense import DenseRetriever, ScoredChunk
 from retrieval.bm25 import BM25Retriever
 from retrieval.hybrid import HybridRetriever
+from retrieval.multi_query import MultiQueryRetriever
 from retrieval.reranker import get_reranker
 from ingestion.chunker import (
     fixed_size_chunker, 
@@ -29,18 +30,27 @@ class ClinicalRAGChain:
         self.bm25_retriever = BM25Retriever()
         self.reranker = get_reranker()
         
-        self.hybrid_retriever = HybridRetriever(
-            dense=self.dense_retriever, 
-            bm25=self.bm25_retriever, 
-            reranker=self.reranker
-        )
-        
         # Setup the LLM
         try:
             self.llm = ChatGroq(model=settings.llm_model, temperature=0)
         except Exception as e:
             print(f"Warning: ChatGroq initialization failed (missing GROQ_API_KEY?): {e}")
             self.llm = None
+
+        if settings.use_multi_query:
+            print("INFO: Using MultiQueryRetriever (RAG Fusion)")
+            self.retriever = MultiQueryRetriever(
+                dense=self.dense_retriever, 
+                bm25=self.bm25_retriever, 
+                llm=self.llm,
+                reranker=self.reranker
+            )
+        else:
+            self.retriever = HybridRetriever(
+                dense=self.dense_retriever, 
+                bm25=self.bm25_retriever, 
+                reranker=self.reranker
+            )
         
         # Define the system prompt
         self.prompt = PromptTemplate.from_template(
@@ -67,13 +77,13 @@ class ClinicalRAGChain:
             func = strategies.get(self.strategy, hierarchical_chunker)
             chunks = func(chunks)
             
-        self.hybrid_retriever.index(chunks)
+        self.retriever.index(chunks)
 
     def answer(self, query: str) -> Dict[str, Any]:
         """Runs the full pipeline to answer a query."""
         
         # 1. Retrieve & Rerank
-        top_chunks = self.hybrid_retriever.search(query, k=settings.top_k)
+        top_chunks = self.retriever.search(query, k=settings.top_k)
         
         # 2. Format Context
         context_blocks = []
