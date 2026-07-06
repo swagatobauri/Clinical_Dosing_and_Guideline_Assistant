@@ -39,6 +39,7 @@ from ingestion.chunker import (
     semantic_chunker, 
     hierarchical_chunker
 )
+from app.rag_chain import ClinicalRAGChain
 
 load_dotenv()
 
@@ -183,12 +184,108 @@ def run_evaluation_for_strategy(strategy_name: str, chunker_func, queries: List[
         
     return avg_scores
 
+def run_full_chain_eval(queries: List[Dict]):
+    print("\n--- Running Full Chain Evaluation (Hallucination Detection) ---")
+    
+    # 1. Initialize the actual ClinicalRAGChain
+    try:
+        chain = ClinicalRAGChain(strategy="hierarchical")
+        
+        sections = [{"text": SAMPLE_CLINICAL_TEXT, "source": "Clinical_Sample.txt", "section": "All", "page": 1}]
+        print("Indexing sample text into the full chain...")
+        chain.index(sections)
+    except Exception as e:
+        print(f"Failed to initialize or index ClinicalRAGChain: {e}")
+        return {}
+        
+    # 2. Run queries
+    print("Generating answers using the full chain...")
+    dataset_dict = {
+        "question": [],
+        "answer": [],
+        "contexts": [],
+        "ground_truth": [],
+        "query_type": []
+    }
+    
+    for i, q in enumerate(queries):
+        question = q["query"]
+        ground_truth = q["ground_truth_answer"]
+        q_type = q.get("query_type", "unknown")
+        
+        try:
+            res = chain.answer(question)
+            answer = res["answer"]
+            # Extract texts from sources
+            contexts = [s["text"] for s in res["sources"]]
+            
+            dataset_dict["question"].append(question)
+            dataset_dict["answer"].append(answer)
+            dataset_dict["contexts"].append(contexts)
+            dataset_dict["ground_truth"].append(ground_truth)
+            dataset_dict["query_type"].append(q_type)
+        except Exception as e:
+            print(f"Error processing query {i+1}: {e}")
+            
+    if not dataset_dict["question"]:
+        print("No answers generated.")
+        return {}
+        
+    # Remove query_type before converting to HF dataset for Ragas
+    types_list = dataset_dict.pop("query_type")
+    dataset = Dataset.from_dict(dataset_dict)
+    
+    # 3. RAGAS Evaluation (specifically focused on faithfulness for hallucination detection)
+    print("Running RAGAS evaluation on full chain outputs...")
+    metrics = [
+        faithfulness,
+        answer_relevancy,
+        context_precision,
+        context_recall,
+    ]
+    
+    try:
+        # Ragas returns a Result object that acts like a dict and can be converted to pandas
+        results = evaluate(dataset, metrics=metrics)
+        df = results.to_pandas()
+        
+        # Re-add query types for analysis
+        df["query_type"] = types_list
+        
+        print("\n\n==========================================")
+        print("Full Chain Evaluation Results (By Query Type)")
+        print("==========================================")
+        
+        # Group by query type and compute means
+        grouped = df.groupby("query_type")[["faithfulness", "answer_relevancy"]].mean().reset_index()
+        print(tabulate(grouped, headers="keys", tablefmt="pipe", showindex=False))
+        
+        print("\nOverall Chain Score:")
+        overall = df[["faithfulness", "answer_relevancy", "context_precision", "context_recall"]].mean().to_dict()
+        for k, v in overall.items():
+            print(f"  {k}: {v:.2f}")
+            
+        # Save results
+        os.makedirs("eval/results", exist_ok=True)
+        df.to_csv("eval/results/full_chain_scores.csv", index=False)
+        
+        return overall
+        
+    except Exception as e:
+        print(f"RAGAS evaluation failed: {e}")
+        return {}
+
 def main():
-    parser = argparse.ArgumentParser(description="Evaluate chunking strategies with RAGAS")
-    parser.add_argument("--strategy", type=str, default="all", choices=["fixed", "recursive", "semantic", "hierarchical", "all"], help="Strategy to evaluate")
+    parser = argparse.ArgumentParser(description="Evaluate clinical RAG")
+    parser.add_argument("--mode", type=str, default="chunker", choices=["chunker", "chain"], help="Evaluate chunking strategies or the full chain")
+    parser.add_argument("--strategy", type=str, default="all", choices=["fixed", "recursive", "semantic", "hierarchical", "all"], help="Strategy to evaluate (only in chunker mode)")
     args = parser.parse_args()
     
     queries = load_queries("eval/labeled_queries.json")
+    
+    if args.mode == "chain":
+        run_full_chain_eval(queries)
+        return
     
     strategies = {
         "fixed": lambda s: fixed_size_chunker(s, chunk_size=512, overlap=50),

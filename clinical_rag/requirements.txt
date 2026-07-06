@@ -22,6 +22,7 @@ pypdf
 
 # Evaluation
 ragas
+langchain-google-vertexai
 
 # Optional Rerankers
 cohere
