@@ -13,6 +13,7 @@ from retrieval.bm25 import BM25Retriever
 from retrieval.hybrid import HybridRetriever
 from retrieval.multi_query import MultiQueryRetriever
 from retrieval.reranker import get_reranker
+from app.memory import ConversationMemory
 from ingestion.chunker import (
     fixed_size_chunker, 
     recursive_chunker, 
@@ -23,6 +24,7 @@ from ingestion.chunker import (
 class ClinicalRAGChain:
     def __init__(self, strategy="hierarchical"):
         self.strategy = strategy
+        self.memory = ConversationMemory(max_turns=settings.memory_turns)
         
         # Build the retrievers
         # Uses local HuggingFace embeddings by default (100% Free)
@@ -52,14 +54,14 @@ class ClinicalRAGChain:
                 reranker=self.reranker
             )
         
-        # Define the system prompt
+        # Define the system prompt with conversation history
         self.prompt = PromptTemplate.from_template(
-            "You are a clinical pharmacist assistant. Answer using ONLY the provided context.\n"
-            "Cite every dosing rule as [Source: {{document}}, Section: {{section}}].\n"
-            "If context is insufficient, respond: INSUFFICIENT INFORMATION — consult the drug monograph directly.\n\n"
-            "Context:\n{context}\n\n"
+            "You are a clinical dosing assistant. Use ONLY the provided context and conversation history to answer.\n\n"
+            "Conversation History:\n{history}\n\n"
+            "Context Documents:\n{context}\n\n"
             "Question: {question}\n\n"
-            "Answer:"
+            "If the answer is not in the context, say 'I cannot find the answer in the provided clinical guidelines.' "
+            "Do not guess. Answer:\n"
         )
 
     def index(self, documents_or_chunks: List[Dict[str, Any]]):
@@ -85,7 +87,7 @@ class ClinicalRAGChain:
         # 1. Retrieve & Rerank
         top_chunks = self.retriever.search(query, k=settings.top_k)
         
-        # 2. Format Context
+        # 2. Format Context and History
         context_blocks = []
         sources = []
         
@@ -113,23 +115,26 @@ class ClinicalRAGChain:
             })
             
         context_str = "\n\n".join(context_blocks)
+        history_str = self.memory.get_context_string()
         
         # 3. Generate Answer
-        prompt_val = self.prompt.format(
-            context=context_str,
-            question=query
-        )
-        
-        # Catch LLM errors
         answer_text = ""
         if not self.llm:
             answer_text = "[LLM ERROR: ChatGroq not initialized. Please set GROQ_API_KEY.]"
         else:
             try:
+                prompt_val = self.prompt.format(
+                    context=context_str,
+                    history=history_str,
+                    question=query
+                )
                 response = self.llm.invoke(prompt_val)
                 answer_text = response.content
             except Exception as e:
                 answer_text = f"Error generating answer: {e}"
+            
+        # 4. Save to memory
+        self.memory.add_turn(query=query, answer=answer_text)
             
         # 4. Compute Confidence
         confidence = "high"

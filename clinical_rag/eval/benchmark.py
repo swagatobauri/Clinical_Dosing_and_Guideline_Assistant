@@ -23,14 +23,20 @@ from langchain_core.documents import Document
 # pyrefly: ignore [missing-import]
 from datasets import Dataset
 # pyrefly: ignore [missing-import]
-from ragas import evaluate
-# pyrefly: ignore [missing-import]
-from ragas.metrics import (
-    context_precision,
-    context_recall,
-    faithfulness,
-    answer_relevancy,
-)
+try:
+    # pyrefly: ignore [missing-import]
+    from ragas import evaluate
+    # pyrefly: ignore [missing-import]
+    from ragas.metrics import (
+        context_precision,
+        context_recall,
+        faithfulness,
+        answer_relevancy,
+    )
+    RAGAS_AVAILABLE = True
+except ImportError as e:
+    print(f"Warning: RAGAS could not be imported: {e}. Evaluation metrics will be skipped.")
+    RAGAS_AVAILABLE = False
 
 # Local imports
 from ingestion.chunker import (
@@ -233,6 +239,17 @@ def run_full_chain_eval(queries: List[Dict]):
         
     # Remove query_type before converting to HF dataset for Ragas
     types_list = dataset_dict.pop("query_type")
+    
+    if not RAGAS_AVAILABLE:
+        print("\n\n==========================================")
+        print("Full Chain Outputs (Evaluation Skipped)")
+        print("==========================================")
+        for i in range(len(dataset_dict["question"])):
+            print(f"Q: {dataset_dict['question'][i]}")
+            print(f"A: {dataset_dict['answer'][i]}")
+            print("-" * 40)
+        return {}
+        
     dataset = Dataset.from_dict(dataset_dict)
     
     # 3. RAGAS Evaluation (specifically focused on faithfulness for hallucination detection)
